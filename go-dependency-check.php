@@ -4,7 +4,7 @@
  * Plugin URI: http://gigaom.com
  * Description: A plugin to centralize our plugin dependency checking.
  * Version: 1.0
- * Author: Gigaom
+ * Author: Stephen Page - Gigaom
  * Author URI: http://gigaom.com/
  */
 
