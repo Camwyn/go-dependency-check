@@ -35,8 +35,8 @@ public function add_plugin_dependencies( $dependencies )
 }//end add_plugin_dependencies
 ```
 
-####Then, in `init` and/or `admin_init` ( or wherever you initialize your plugin ):
-(use the same class_name as above)
+####Then, in `init` and/or `admin_init`:
+( or wherever you initialize your plugin )
 ```
 $go = apply_filters( 'class_name_dependencies', TRUE );
 
@@ -45,5 +45,6 @@ if ( ! $go )
 	return;
 }//end if
 ```
+(use the same class_name as in the `add_plugin_dependencies` function)
 
 Profit!
