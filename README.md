@@ -5,9 +5,9 @@ A WordPress plugin to centralize our plugin dependency checking and allow for gr
 None. Really. OK, it does expect some logic in the naming of classes and functions, but that's about it!
 
 ##What it does
-GO Dependency Check allows you to use a few filter calls and a short function to test plugin dependencies prior to `init`. By leveraging the earlier `plugins_loaded` action hook, we can check dependencies prior to plugin init. If a missing dependency is discovered, we create a plugin-specific filter so the plugin can test against it and shut down as to avoid fatal errors.
+GO Dependency Check allows you to use a few filter calls and a short function to test plugin dependencies prior to `init`. By leveraging the earlier `after_setup_theme` action hook, we can check dependencies prior to plugin init. If a missing dependency is discovered, we create a plugin-specific filter so the plugin can test against it and shut down as to avoid fatal errors.
 
-As an added bonus, you get a spiffy admin alert to notify you that you have to activate (or install) other plugins.
+Additionally, you get a spiffy admin alert to notify you that you have to activate (or install) other plugins. As an added bonus, the plugin also adds information on how long it takes to the notice.
 
 ##Usage
 Recommended setup:
@@ -45,6 +45,8 @@ if ( ! $go )
 	return;
 }//end if
 ```
-(use the same class_name as in the `add_plugin_dependencies` function)
+(It's important you use the same class_name as in the `add_plugin_dependencies` function!)
 
 Profit!
+
+Many thanks to @borkweb for his advice on timing.

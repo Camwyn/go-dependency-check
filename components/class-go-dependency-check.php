@@ -7,23 +7,24 @@ class GO_Dependency_Check
 	private $plugins = array();
 	private $tested = array();
 	private $time;
+	private $ttl = 30;
 
 	public function __construct()
 	{
 		$this->time = time();
-		add_action( 'plugins_loaded', array( $this, 'plugins_loaded' ) );
+		add_action( 'after_setup_theme', array( $this, 'after_setup_theme' ) );
 	}//end __construct
 	/**
 	 * Hooked to the plugin_loaded action, as this plugin needs to run before the others
 	 * finish loading, particularly since it creates filters for each plugin to check during init
 	 */
-	public function plugins_loaded()
+	public function after_setup_theme()
 	{
 		//Here's our filter for dependencies - call it with add_filter in the dependent plugin
 		$this->plugins = apply_filters( 'add_plugin_dependencies', $this->plugins );
 		//once we have our dependencies, let's check them
 		$this->dependencies = $this->check_dependencies();
-	}//end plugins_loaded
+	}//end after_setup_theme
 
 	/**
 	 * check_dependencies loops through all our collected plugin data and sorts it,
@@ -40,38 +41,39 @@ class GO_Dependency_Check
 			if ( in_array( $plugin, $this->tested ) )
 			{
 				continue;
-			}
-				array_push( $this->tested, $plugin );
+			}//end if
 
-				//Now we check each dependency
-				foreach ( $dependencies as $name => $url )
+			array_push( $this->tested, $plugin );
+
+			//Now we check each dependency
+			foreach ( $dependencies as $name => $url )
+			{
+				if ( in_array( $name, $this->missing_dependencies ) )
 				{
-					if ( in_array( $name, $this->missing_dependencies ) )
-					{
-						continue;
-					}//end if
+					continue;
+				}//end if
 
-					//Essentially, this looks for a function or class with the plugin name
-					//dashes aren't allowed, so we change them to underscores
-					if ( function_exists( str_replace( '-', '_', $name ) ) || class_exists( str_replace( '-', '_', $name ) ) )
-					{
-						continue;
-					}//end if
+				//Essentially, this looks for a function or class with the plugin name
+				//dashes aren't allowed, so we change them to underscores
+				if ( function_exists( str_replace( '-', '_', $name ) ) || class_exists( str_replace( '-', '_', $name ) ) )
+				{
+					continue;
+				}//end if
 
-					//The url should be the same for every plugin
-					//use canonical URls - not your personal fork!
-					if ( ! in_array( $name, $this->missing_dependencies ) )
-					{
-						$this->missing_dependencies[ $name ][ 'url' ] = $url;
-					}//end if
+				//The url should be the same for every plugin
+				//use canonical URls - not your personal fork!
+				if ( ! in_array( $name, $this->missing_dependencies ) )
+				{
+					$this->missing_dependencies[ $name ][ 'url' ] = $url;
+				}//end if
 
-					//Add the dependent plugin name to the list - this is for when we
-					//have more than one plugin with the same dependencies
-					$this->missing_dependencies[ $name ][ 'plugins' ][] = $plugin;
+				//Add the dependent plugin name to the list - this is for when we
+				//have more than one plugin with the same dependencies
+				$this->missing_dependencies[ $name ][ 'plugins' ][] = $plugin;
 
-					//add a filter to tell the plugin to fail.
-					add_filter( $plugin . '_dependencies', function(){ return FALSE; } );
-				}//end foreach
+				//add a filter to tell the plugin to fail.
+				add_filter( 'go_dependency_check_' . $plugin, __return_false() );
+			}//end foreach
 		}//end foreach
 
 		//Make sure to queue up or notice if we've missing dependencies
